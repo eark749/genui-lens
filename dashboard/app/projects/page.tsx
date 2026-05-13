@@ -194,7 +194,7 @@ export default function ProjectsPage() {
                       API Keys
                     </Link>
                     <button
-                      onClick={() => { setProject({ id: p.id, name: p.name }); router.push("/"); }}
+                      onClick={() => { setProject({ id: p.id, name: p.name }); router.push("/dashboard"); }}
                       className="px-3 py-1.5 text-xs rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
                     >
                       Open dashboard →

@@ -1,6 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes pinIn {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 6px)); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+@keyframes lensLivePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.85); }
+}
+@keyframes lensBlink {
+  50% { opacity: 0; }
+}
+.lens-pin-in  { animation: pinIn 400ms ease-out both; }
+.lens-live-pulse { animation: lensLivePulse 1.4s ease-in-out infinite; }
+.lens-caret   { animation: lensBlink 1s steps(2) infinite; }
 
 .dark {
   color-scheme: dark;

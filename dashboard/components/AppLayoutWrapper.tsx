@@ -3,12 +3,14 @@
 import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/AppSidebar";
 
-const FULL_PAGE_ROUTES = ["/login", "/auth"];
+const FULL_PAGE_ROUTES = ["/login", "/auth", "/"];
 const FLUSH_ROUTES = ["/chat"]; // full-height, no padding
 
 export function AppLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isFullPage = FULL_PAGE_ROUTES.some((r) => pathname.startsWith(r));
+  const isFullPage = FULL_PAGE_ROUTES.some((r) =>
+    r === "/" ? pathname === "/" : pathname.startsWith(r)
+  );
   const isFlush = FLUSH_ROUTES.some((r) => pathname.startsWith(r));
 
   if (isFullPage) return <>{children}</>;
