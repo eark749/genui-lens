@@ -27,7 +27,7 @@ async def create_view(
 
     for comp in body.components or []:
         stmt = (
-            insert(Component)
+            insert(Component.__table__)
             .values(
                 id=str(uuid.uuid4()),
                 project_id=project.id,
@@ -36,7 +36,7 @@ async def create_view(
                 metadata=comp.metadata or {},
             )
             .on_conflict_do_update(
-                constraint="components_project_id_component_id_key",
+                index_elements=["project_id", "component_id"],
                 set_={"type": comp.type, "metadata": comp.metadata or {}},
             )
         )

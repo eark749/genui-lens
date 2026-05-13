@@ -2,9 +2,10 @@ import uuid
 from datetime import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.dialects.postgresql import insert
 
 from ..database import get_db
-from ..models import Project, Event
+from ..models import Project, Session as SessionModel, Event
 from ..schemas import EventCreate, EventResponse
 from ..auth import get_project
 
@@ -17,6 +18,13 @@ async def create_event(
     project: Project = Depends(get_project),
     db: AsyncSession = Depends(get_db),
 ):
+    stmt = (
+        insert(SessionModel)
+        .values(id=body.session_id, project_id=project.id, created_at=datetime.utcnow())
+        .on_conflict_do_nothing(index_elements=["id"])
+    )
+    await db.execute(stmt)
+
     event_id = body.event_id or str(uuid.uuid4())
     event = Event(
         id=event_id,
