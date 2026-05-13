@@ -8,9 +8,9 @@ function pct(r: number) {
 }
 
 function rateColor(r: number) {
-  if (r >= 0.7) return "text-green-600";
-  if (r >= 0.4) return "text-yellow-600";
-  return "text-red-500";
+  if (r >= 0.7) return "text-green-600 dark:text-green-400";
+  if (r >= 0.4) return "text-yellow-600 dark:text-yellow-400";
+  return "text-red-500 dark:text-red-400";
 }
 
 export default async function OverviewPage() {
@@ -52,41 +52,38 @@ export default async function OverviewPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-xl font-semibold text-gray-900">Overview</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-zinc-100">Overview</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-zinc-500">
           Health of your AI-driven experiences across all tasks and conversations.
         </p>
       </div>
 
-      {/* KPI cards */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         {kpis.map(({ label, value }) => (
-          <div key={label} className="bg-white rounded-lg border border-gray-200 p-5">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
-            <p className="text-2xl font-semibold text-gray-900 mt-1">{value}</p>
+          <div key={label} className="bg-white dark:bg-[#111113] rounded-lg border border-gray-200 dark:border-[#27272a] p-5">
+            <p className="text-xs font-medium text-gray-500 dark:text-zinc-500 uppercase tracking-wide">{label}</p>
+            <p className="text-2xl font-semibold text-gray-900 dark:text-zinc-100 mt-1">{value}</p>
           </div>
         ))}
       </div>
 
-      {/* Two panels */}
       <div className="grid grid-cols-2 gap-6">
-        {/* Top tasks */}
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-900">Top Tasks by Volume</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Most frequently requested intents</p>
+        <div className="bg-white dark:bg-[#111113] rounded-lg border border-gray-200 dark:border-[#27272a]">
+          <div className="px-5 py-4 border-b border-gray-100 dark:border-[#1c1c1f]">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-zinc-100">Top Tasks by Volume</h2>
+            <p className="text-xs text-gray-400 dark:text-zinc-600 mt-0.5">Most frequently requested intents</p>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-gray-50 dark:divide-[#1c1c1f]">
             {topTasks.length === 0 && (
-              <p className="px-5 py-6 text-sm text-gray-400">No tasks yet.</p>
+              <p className="px-5 py-6 text-sm text-gray-400 dark:text-zinc-600">No tasks yet.</p>
             )}
             {topTasks.map((row) => (
-              <div key={row.intent} className="flex items-center justify-between px-5 py-3">
-                <p className="text-sm text-gray-800 truncate max-w-[200px]">
+              <div key={row.intent} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 dark:hover:bg-[#1c1c1f] transition-colors">
+                <p className="text-sm text-gray-800 dark:text-zinc-300 truncate max-w-[200px]">
                   {cleanIntent(row.intent)}
                 </p>
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="text-xs text-gray-400">{row.view_count} runs</span>
+                  <span className="text-xs text-gray-400 dark:text-zinc-600">{row.view_count} runs</span>
                   <span className={`text-xs font-semibold ${rateColor(row.success_rate)}`}>
                     {pct(row.success_rate)}
                   </span>
@@ -96,26 +93,25 @@ export default async function OverviewPage() {
           </div>
         </div>
 
-        {/* Top UI elements */}
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-900">Top UI Elements by Interactions</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Which components users actually click</p>
+        <div className="bg-white dark:bg-[#111113] rounded-lg border border-gray-200 dark:border-[#27272a]">
+          <div className="px-5 py-4 border-b border-gray-100 dark:border-[#1c1c1f]">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-zinc-100">Top UI Elements by Interactions</h2>
+            <p className="text-xs text-gray-400 dark:text-zinc-600 mt-0.5">Which components users actually click</p>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-gray-50 dark:divide-[#1c1c1f]">
             {topElements.length === 0 && (
-              <p className="px-5 py-6 text-sm text-gray-400">No interactions yet.</p>
+              <p className="px-5 py-6 text-sm text-gray-400 dark:text-zinc-600">No interactions yet.</p>
             )}
             {topElements.map((row) => (
-              <div key={row.component_id} className="flex items-center justify-between px-5 py-3">
+              <div key={row.component_id} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 dark:hover:bg-[#1c1c1f] transition-colors">
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                  <span className="inline-flex px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-[#27272a] text-gray-600 dark:text-zinc-400">
                     {row.type}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="text-xs text-gray-400">{row.view_count} appearances</span>
-                  <span className={`text-xs font-semibold ${row.action_count > 0 ? "text-purple-600" : "text-gray-300"}`}>
+                  <span className="text-xs text-gray-400 dark:text-zinc-600">{row.view_count} appearances</span>
+                  <span className={`text-xs font-semibold ${row.action_count > 0 ? "text-purple-600 dark:text-purple-400" : "text-gray-300 dark:text-zinc-700"}`}>
                     {row.action_count} clicks
                   </span>
                 </div>

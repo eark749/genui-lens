@@ -1,6 +1,6 @@
 {
   "name": "@genui-lens/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Observability SDK for Generative UI (C1, C1Chat, Agent Builder)",
   "type": "module",
   "main": "./dist/index.cjs",
