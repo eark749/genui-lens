@@ -20,6 +20,7 @@ build/
 # Node / SDK
 node_modules/
 sdk/dist/
+dashboard/.next/
 
 # OS
 .DS_Store
