@@ -1,75 +1,128 @@
-import { getViewSummary } from "@/lib/api";
+import { getViewSummary, getComponentSummary, getSessions } from "@/lib/api";
+import { cleanIntent, isDirtyIntent, getCategory } from "@/lib/categories";
 
 export const revalidate = 0;
 
-function pct(rate: number) {
-  return `${(rate * 100).toFixed(1)}%`;
+function pct(r: number) {
+  return `${(r * 100).toFixed(1)}%`;
 }
 
-function rateColor(rate: number) {
-  if (rate >= 0.7) return "text-green-600";
-  if (rate >= 0.4) return "text-yellow-600";
+function rateColor(r: number) {
+  if (r >= 0.7) return "text-green-600";
+  if (r >= 0.4) return "text-yellow-600";
   return "text-red-500";
 }
 
-export default async function IntentsPage() {
-  const intents = await getViewSummary();
+export default async function OverviewPage() {
+  const [intents, components, sessions] = await Promise.all([
+    getViewSummary(),
+    getComponentSummary(),
+    getSessions(),
+  ]);
 
-  const totalViews = intents.reduce((s, i) => s + i.view_count, 0);
-  const totalSuccess = intents.reduce((s, i) => s + i.success_events, 0);
-  const avgRate = totalViews > 0 ? totalSuccess / totalViews : 0;
+  const cleanIntents = intents.filter((i) => !isDirtyIntent(i.intent));
+
+  const totalTasks = cleanIntents.length;
+  const totalConversations = sessions.length;
+  const avgSuccessRate =
+    cleanIntents.length > 0
+      ? cleanIntents.reduce((s, i) => s + i.success_rate, 0) / cleanIntents.length
+      : 0;
+  const engagementRate =
+    sessions.length > 0
+      ? sessions.filter((s) => s.success_count > 0).length / sessions.length
+      : 0;
+
+  const topTasks = [...cleanIntents]
+    .sort((a, b) => b.view_count - a.view_count)
+    .slice(0, 5);
+
+  const topElements = [...components]
+    .filter((c) => getCategory(c.component_id) === "Action" || c.action_count > 0)
+    .sort((a, b) => b.action_count - a.action_count)
+    .slice(0, 5);
+
+  const kpis = [
+    { label: "Total Tasks", value: totalTasks },
+    { label: "Conversations", value: totalConversations },
+    { label: "Avg Task Success", value: pct(avgSuccessRate) },
+    { label: "Session Engagement", value: pct(engagementRate) },
+  ];
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900 mb-6">Intent Performance</h1>
+      <div className="mb-8">
+        <h1 className="text-xl font-semibold text-gray-900">Overview</h1>
+        <p className="mt-1 text-sm text-gray-500">
+          Health of your AI-driven experiences across all tasks and conversations.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        {[
-          { label: "Total Views", value: totalViews },
-          { label: "Total Successes", value: totalSuccess },
-          { label: "Avg Success Rate", value: pct(avgRate) },
-        ].map(({ label, value }) => (
+      {/* KPI cards */}
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        {kpis.map(({ label, value }) => (
           <div key={label} className="bg-white rounded-lg border border-gray-200 p-5">
-            <p className="text-sm text-gray-500">{label}</p>
-            <p className="text-3xl font-semibold text-gray-900 mt-1">{value}</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">{value}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              {["Intent", "Views", "Successes", "Success Rate"].map((h) => (
-                <th
-                  key={h}
-                  className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {intents.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-gray-400 text-sm">
-                  No views tracked yet. Integrate the SDK and fire some events.
-                </td>
-              </tr>
+      {/* Two panels */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Top tasks */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h2 className="text-sm font-semibold text-gray-900">Top Tasks by Volume</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Most frequently requested intents</p>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {topTasks.length === 0 && (
+              <p className="px-5 py-6 text-sm text-gray-400">No tasks yet.</p>
             )}
-            {intents.map((row) => (
-              <tr key={row.intent} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-mono text-gray-900">{row.intent}</td>
-                <td className="px-4 py-3 text-gray-600">{row.view_count}</td>
-                <td className="px-4 py-3 text-gray-600">{row.success_events}</td>
-                <td className={`px-4 py-3 font-semibold ${rateColor(row.success_rate)}`}>
-                  {pct(row.success_rate)}
-                </td>
-              </tr>
+            {topTasks.map((row) => (
+              <div key={row.intent} className="flex items-center justify-between px-5 py-3">
+                <p className="text-sm text-gray-800 truncate max-w-[200px]">
+                  {cleanIntent(row.intent)}
+                </p>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <span className="text-xs text-gray-400">{row.view_count} runs</span>
+                  <span className={`text-xs font-semibold ${rateColor(row.success_rate)}`}>
+                    {pct(row.success_rate)}
+                  </span>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
+
+        {/* Top UI elements */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h2 className="text-sm font-semibold text-gray-900">Top UI Elements by Interactions</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Which components users actually click</p>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {topElements.length === 0 && (
+              <p className="px-5 py-6 text-sm text-gray-400">No interactions yet.</p>
+            )}
+            {topElements.map((row) => (
+              <div key={row.component_id} className="flex items-center justify-between px-5 py-3">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                    {row.type}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <span className="text-xs text-gray-400">{row.view_count} appearances</span>
+                  <span className="text-xs font-semibold text-purple-600">
+                    {row.action_count} clicks
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
