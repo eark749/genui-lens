@@ -115,7 +115,7 @@ export default async function OverviewPage() {
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
                   <span className="text-xs text-gray-400">{row.view_count} appearances</span>
-                  <span className="text-xs font-semibold text-purple-600">
+                  <span className={`text-xs font-semibold ${row.action_count > 0 ? "text-purple-600" : "text-gray-300"}`}>
                     {row.action_count} clicks
                   </span>
                 </div>

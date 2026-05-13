@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { getSessionDetail, SessionSummary, ViewDetail } from "@/lib/api";
+import { SessionSummary, ViewDetail } from "@/lib/api";
+
+async function fetchSessionDetail(sessionId: string) {
+  const resp = await fetch(`/api/sessions/${sessionId}`);
+  if (!resp.ok) throw new Error("failed");
+  return resp.json();
+}
 
 const INTERACTIVE = new Set([
   "button", "submitbutton", "form", "datepicker", "textinput",
@@ -97,7 +103,7 @@ export function SessionRow({ session }: { session: SessionSummary }) {
   async function toggle() {
     if (!expanded && views === null) {
       setLoading(true);
-      const detail = await getSessionDetail(session.session_id);
+      const detail = await fetchSessionDetail(session.session_id);
       setViews(detail.views);
       setLoading(false);
     }

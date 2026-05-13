@@ -24,9 +24,12 @@ function extractComponents(c1Content: string) {
   }));
 }
 
+function decodeEntities(s: string): string {
+  return s.replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+}
+
 function cleanIntent(raw: string): string {
-  // C1Chat appends ["User clicked: ...",{...}] to follow-up action content
-  return raw
+  return decodeEntities(raw)
     .replace(/<[^>]*>/g, "")
     .split('["')[0]
     .trim()
@@ -66,9 +69,10 @@ export async function POST(req: NextRequest) {
 
   const thread = getThread(threadId);
 
-  // Fire business event for the previous assistant response (server-side, reliable)
+  // Fire events for the previous assistant response (server-side, reliable)
   const prevAssistant = [...thread].reverse().find((m) => m.role === "assistant");
   if (prevAssistant?.id) {
+    // Always fire business event (user engaged by sending a follow-up)
     postToLens("/v1/events", {
       session_id: threadId,
       view_id: prevAssistant.id,
@@ -76,6 +80,30 @@ export async function POST(req: NextRequest) {
       action_type: "follow_up",
       payload: {},
     });
+
+    // If the message is a C1 component action (form submit / button click),
+    // also fire an action event so UI Elements interaction count increments.
+    // Format: {text}["User clicked: {label}",{params}]
+    const content = typeof prompt.content === "string" ? decodeEntities(prompt.content) : "";
+    const actionMatch = content.match(/\["User clicked:\s*([^"]+)",\s*(\{.*\})\]/s);
+    if (actionMatch) {
+      const label = actionMatch[1].trim();
+      const params = (() => { try { return JSON.parse(actionMatch[2]); } catch { return {}; } })();
+      // Map common labels to component_ids that exist in the Component table
+      const componentId =
+        label.toLowerCase() === "submit" || label.toLowerCase().includes("submit")
+          ? "button"
+          : label.toLowerCase().replace(/\s+/g, "_").slice(0, 50);
+
+      postToLens("/v1/events", {
+        session_id: threadId,
+        view_id: prevAssistant.id,
+        event_type: "action",
+        component_id: componentId,
+        action_type: "click",
+        payload: params,
+      });
+    }
   }
 
   thread.push(prompt);

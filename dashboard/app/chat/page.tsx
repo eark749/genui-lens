@@ -34,10 +34,7 @@ export default function ChatPage() {
     >
       <C1Chat
         processMessage={async ({ threadId, messages, responseId, abortController }) => {
-          // Track current context so onAction can reference it
-          currentCtx.current = { threadId, responseId };
-
-          return fetch("/api/chat", {
+          const resp = await fetch("/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -47,6 +44,10 @@ export default function ChatPage() {
             }),
             signal: abortController.signal,
           });
+          // Update AFTER headers arrive — view is created server-side before stream starts,
+          // so by the time fetch resolves the view_id is safe to reference in onAction.
+          currentCtx.current = { threadId, responseId };
+          return resp;
         }}
         onAction={(action) => {
           // Fires for form submits, button clicks inside generated UI

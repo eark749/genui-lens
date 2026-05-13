@@ -16,6 +16,12 @@ const MAP: Record<string, Category> = {
   slider: "Input",
   textarea: "Input",
   searchinput: "Input",
+  input: "Input",
+  inputfield: "Input",
+  numberinput: "Input",
+  dateinput: "Input",
+  timeinput: "Input",
+  fileinput: "Input",
 };
 
 export function getCategory(componentId: string): Category {
