@@ -7,7 +7,7 @@ const SECTIONS = [
   { id: "quick-install", label: "Quick Install" },
   { id: "use-cases", label: "Use Cases" },
   { id: "typescript-example", label: "TypeScript Example" },
-  { id: "api-reference", label: "API Reference" },
+  { id: "api-reference", label: "SDK Reference" },
   { id: "what-shows-up-where", label: "What shows up where" },
 ];
 
@@ -100,16 +100,49 @@ export default function DocsPage() {
           {/* Key features */}
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
-              { icon: "📊", title: "View analytics", desc: "See every AI-generated UI render — intent, frequency, success rate." },
-              { icon: "🖱️", title: "Interaction tracking", desc: "Count clicks, fills, and submissions per component type." },
-              { icon: "✅", title: "Business outcomes", desc: "Know which AI responses lead to real user actions." },
-              { icon: "💬", title: "Conversation replay", desc: "Replay full sessions to see exactly what the user saw and did." },
+              {
+                icon: (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                  </svg>
+                ),
+                title: "View analytics",
+                desc: "See every AI-generated UI render — intent, frequency, success rate.",
+              },
+              {
+                icon: (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 15l-6-6m0 0l6-6m-6 6h12M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z" strokeWidth="0" fill="none"/>
+                    <circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/>
+                  </svg>
+                ),
+                title: "Interaction tracking",
+                desc: "Count clicks, fills, and submissions per component type.",
+              },
+              {
+                icon: (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                ),
+                title: "Business outcomes",
+                desc: "Know which AI responses lead to real user actions.",
+              },
+              {
+                icon: (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                ),
+                title: "Conversation replay",
+                desc: "Replay full sessions to see exactly what the user saw and did.",
+              },
             ].map((f) => (
               <div
                 key={f.title}
                 className="rounded-lg border border-gray-200 dark:border-[#27272a] p-4 bg-white dark:bg-[#111113]"
               >
-                <div className="text-xl mb-2">{f.icon}</div>
+                <div className="mb-2 text-gray-500 dark:text-zinc-400">{f.icon}</div>
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-zinc-100">{f.title}</h3>
                 <p className="text-xs text-gray-500 dark:text-zinc-500 mt-1">{f.desc}</p>
               </div>
@@ -379,7 +412,7 @@ export async function POST(req: NextRequest) {
         </Section>
 
         {/* API Reference */}
-        <Section id="api-reference" title="API Reference">
+        <Section id="api-reference" title="SDK Reference">
           <div className="space-y-8">
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-zinc-100 mb-1">
