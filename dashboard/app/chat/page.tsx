@@ -8,8 +8,17 @@ const C1Chat = dynamic(
   { ssr: false }
 );
 
+async function trackEvent(body: object) {
+  return fetch("/api/track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).catch(() => {});
+}
+
 export default function ChatPage() {
-  const lastCtx = useRef<{ threadId: string; responseId: string } | null>(null);
+  // holds context of the CURRENT displayed response
+  const currentCtx = useRef<{ threadId: string; responseId: string } | null>(null);
 
   return (
     <div
@@ -25,7 +34,21 @@ export default function ChatPage() {
     >
       <C1Chat
         processMessage={async ({ threadId, messages, responseId, abortController }) => {
-          lastCtx.current = { threadId, responseId };
+          // Fire business event for the response the user just engaged with
+          // (sending any follow-up = the previous response was useful)
+          if (currentCtx.current) {
+            trackEvent({
+              session_id: currentCtx.current.threadId,
+              view_id: currentCtx.current.responseId,
+              event_type: "business",
+              action_type: "follow_up",
+              payload: {},
+            });
+          }
+
+          // Update to the new pending response
+          currentCtx.current = { threadId, responseId };
+
           return fetch("/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -38,19 +61,29 @@ export default function ChatPage() {
           });
         }}
         onAction={(action) => {
-          const ctx = lastCtx.current;
+          // Fires for form submits, button clicks inside generated UI
+          const ctx = currentCtx.current;
           if (!ctx) return;
-          fetch("/api/track", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              session_id: ctx.threadId,
-              view_id: ctx.responseId,
-              event_type: "business",
-              action_type: action.type,
-              payload: action.params ?? {},
-            }),
-          }).catch(() => {});
+          const componentId = action.type?.toLowerCase() ?? "unknown";
+
+          // action event — component action count
+          trackEvent({
+            session_id: ctx.threadId,
+            view_id: ctx.responseId,
+            event_type: "action",
+            component_id: componentId,
+            action_type: "click",
+            payload: action.params ?? {},
+          });
+
+          // business event — success rate
+          trackEvent({
+            session_id: ctx.threadId,
+            view_id: ctx.responseId,
+            event_type: "business",
+            action_type: action.type,
+            payload: action.params ?? {},
+          });
         }}
         agentName="GenUI Lens Assistant"
         welcomeMessage={{
