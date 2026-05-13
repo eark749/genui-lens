@@ -19,6 +19,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Link href="/events" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
             Events
           </Link>
+          <Link href="/sessions" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+            Sessions
+          </Link>
           <Link href="/chat" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
             Chat
           </Link>

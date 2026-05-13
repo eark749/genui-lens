@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, case
+from sqlalchemy import select, func, case, distinct
 
 from ..database import get_db
 from ..models import Project, View, Event, Component, ViewComponent
@@ -48,7 +48,7 @@ async def summary_views(
                 "intent": row.intent,
                 "view_count": row.view_count,
                 "success_events": row.success_events,
-                "success_rate": row.success_events / row.view_count if row.view_count > 0 else 0,
+                "success_rate": min(1.0, row.success_events / row.view_count) if row.view_count > 0 else 0,
             }
             for row in rows
         ],
@@ -66,10 +66,10 @@ async def summary_components(
             Component.type,
             func.count(ViewComponent.view_id.distinct()).label("view_count"),
             func.count(
-                case((Event.event_type == "action", Event.id), else_=None)
+                distinct(case((Event.event_type == "action", Event.id), else_=None))
             ).label("action_count"),
             func.count(
-                case((Event.event_type == "error", Event.id), else_=None)
+                distinct(case((Event.event_type == "error", Event.id), else_=None))
             ).label("error_count"),
         )
         .outerjoin(ViewComponent, ViewComponent.component_id == Component.component_id)

@@ -52,3 +52,35 @@ export async function getEvents(limit = 100): Promise<EventRow[]> {
   const data = await get(`/debug/events?limit=${limit}`);
   return data.events ?? [];
 }
+
+export interface SessionSummary {
+  session_id: string;
+  title: string;
+  started_at: string;
+  view_count: number;
+  success_count: number;
+  success_rate: number;
+}
+
+export interface ViewDetail {
+  view_id: string;
+  intent: string;
+  created_at: string;
+  success_count: number;
+  action_count: number;
+  components: string[];
+}
+
+export interface SessionDetail {
+  session_id: string;
+  views: ViewDetail[];
+}
+
+export async function getSessions(): Promise<SessionSummary[]> {
+  const data = await get("/v1/sessions");
+  return data.sessions ?? [];
+}
+
+export async function getSessionDetail(sessionId: string): Promise<SessionDetail> {
+  return get(`/v1/sessions/${sessionId}`);
+}
