@@ -34,19 +34,7 @@ export default function ChatPage() {
     >
       <C1Chat
         processMessage={async ({ threadId, messages, responseId, abortController }) => {
-          // Fire business event for the response the user just engaged with
-          // (sending any follow-up = the previous response was useful)
-          if (currentCtx.current) {
-            trackEvent({
-              session_id: currentCtx.current.threadId,
-              view_id: currentCtx.current.responseId,
-              event_type: "business",
-              action_type: "follow_up",
-              payload: {},
-            });
-          }
-
-          // Update to the new pending response
+          // Track current context so onAction can reference it
           currentCtx.current = { threadId, responseId };
 
           return fetch("/api/chat", {

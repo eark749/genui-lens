@@ -34,14 +34,27 @@ function cleanIntent(raw: string): string {
 }
 
 async function postToLens(path: string, body: object) {
-  return fetch(`http://localhost:8000${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.GENUI_API_KEY}`,
-    },
-    body: JSON.stringify({ project_id: process.env.GENUI_PROJECT_ID, ...body }),
-  }).catch(() => {});
+  const payload = { project_id: process.env.GENUI_PROJECT_ID, ...body };
+  console.log(`[lens] POST ${path}`, JSON.stringify(payload).slice(0, 200));
+  try {
+    const resp = await fetch(`http://localhost:8000${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GENUI_API_KEY}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const text = await resp.text();
+    if (!resp.ok) {
+      console.error(`[lens] ${path} ${resp.status}:`, text.slice(0, 300));
+    } else {
+      console.log(`[lens] ${path} OK`, text.slice(0, 100));
+    }
+    return resp;
+  } catch (err) {
+    console.error(`[lens] ${path} FETCH ERROR:`, err);
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -52,6 +65,19 @@ export async function POST(req: NextRequest) {
   };
 
   const thread = getThread(threadId);
+
+  // Fire business event for the previous assistant response (server-side, reliable)
+  const prevAssistant = [...thread].reverse().find((m) => m.role === "assistant");
+  if (prevAssistant?.id) {
+    postToLens("/v1/events", {
+      session_id: threadId,
+      view_id: prevAssistant.id,
+      event_type: "business",
+      action_type: "follow_up",
+      payload: {},
+    });
+  }
+
   thread.push(prompt);
 
   const intent = typeof prompt.content === "string"
