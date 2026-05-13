@@ -53,14 +53,12 @@ export default function ChatPage() {
           // Fires for form submits, button clicks inside generated UI
           const ctx = currentCtx.current;
           if (!ctx) return;
-          const componentId = action.type?.toLowerCase() ?? "unknown";
-
           // action event — component action count
           trackEvent({
             session_id: ctx.threadId,
             view_id: ctx.responseId,
             event_type: "action",
-            component_id: componentId,
+            component_id: action.type?.toLowerCase() ?? "button",
             action_type: "click",
             payload: action.params ?? {},
           });

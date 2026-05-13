@@ -89,20 +89,32 @@ export async function POST(req: NextRequest) {
     if (actionMatch) {
       const label = actionMatch[1].trim();
       const params = (() => { try { return JSON.parse(actionMatch[2]); } catch { return {}; } })();
-      // Map common labels to component_ids that exist in the Component table
-      const componentId =
-        label.toLowerCase() === "submit" || label.toLowerCase().includes("submit")
-          ? "button"
-          : label.toLowerCase().replace(/\s+/g, "_").slice(0, 50);
 
-      postToLens("/v1/events", {
-        session_id: threadId,
-        view_id: prevAssistant.id,
-        event_type: "action",
-        component_id: componentId,
-        action_type: "click",
-        payload: params,
-      });
+      // Fire per-field interaction events so input/select/textarea get interaction counts
+      // (button click itself is handled by client-side onAction — don't double-count)
+      const fieldTypes = new Set<string>();
+      function collectComponentTypes(obj: unknown) {
+        if (!obj || typeof obj !== "object") return;
+        for (const v of Object.values(obj as Record<string, unknown>)) {
+          if (v && typeof v === "object" && "componentType" in v && typeof (v as Record<string,unknown>).componentType === "string") {
+            fieldTypes.add(((v as Record<string,unknown>).componentType as string).toLowerCase());
+          }
+          collectComponentTypes(v);
+        }
+      }
+      collectComponentTypes(params);
+
+      for (const compType of fieldTypes) {
+        if (compType === "button") continue;
+        postToLens("/v1/events", {
+          session_id: threadId,
+          view_id: prevAssistant.id,
+          event_type: "action",
+          component_id: compType,
+          action_type: "fill",
+          payload: {},
+        });
+      }
     }
   }
 
