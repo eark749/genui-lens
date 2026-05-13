@@ -25,19 +25,11 @@ export default function ChatPage() {
   return (
     <div
       style={{
-        position: "fixed",
-        top: "57px",
-        left: "16px",
-        right: "16px",
-        bottom: "16px",
-        zIndex: 10,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
         background: isDark ? "#111113" : "#ffffff",
         border: `1px solid ${isDark ? "#27272a" : "#e5e7eb"}`,
-        borderRadius: "12px",
-        overflow: "hidden",
-        boxShadow: isDark
-          ? "0 0 0 1px #1c1c1f"
-          : "0 1px 3px 0 rgb(0 0 0 / 0.06)",
       }}
     >
       <C1Chat
@@ -58,11 +50,14 @@ export default function ChatPage() {
         onAction={(action) => {
           const ctx = currentCtx.current;
           if (!ctx) return;
+          const BUTTON_VARIANTS = new Set(["button", "submitbutton", "iconbutton", "buttongroup"]);
+          const rawType = action.type?.toLowerCase() ?? "button";
+          const compId = BUTTON_VARIANTS.has(rawType) ? "button" : rawType;
           trackEvent({
             session_id: ctx.threadId,
             view_id: ctx.responseId,
             event_type: "action",
-            component_id: action.type?.toLowerCase() ?? "button",
+            component_id: compId,
             action_type: "click",
             payload: action.params ?? {},
           });

@@ -2,8 +2,18 @@ export default function DocsPage() {
   return (
     <div className="max-w-3xl">
       <div className="mb-10">
-        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-400 text-xs font-medium mb-4">
-          @genui-lens/sdk · v0.1.0
+        <div className="flex items-center gap-2 mb-4">
+          <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-400 text-xs font-medium">
+            @genui-lens/sdk · v0.1.1
+          </span>
+          <a
+            href="https://www.npmjs.com/package/@genui-lens/sdk"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-xs font-medium hover:opacity-80 transition-opacity"
+          >
+            ↗ npmjs.com
+          </a>
         </div>
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-zinc-100">SDK Docs</h1>
         <p className="mt-2 text-sm text-gray-500 dark:text-zinc-500">
@@ -11,6 +21,10 @@ export default function DocsPage() {
           with Thesys C1 or C1Chat. Install it, call <Code>init()</Code>, and every view and interaction
           flows into this dashboard automatically.
         </p>
+        <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-lg text-xs text-amber-700 dark:text-amber-400">
+          <strong>Requires a hosted backend.</strong> The SDK sends data to a GenUI Lens backend instance.
+          Clone the backend repo, deploy it (Railway, Render, Fly.io), then pass its URL as <Code>endpoint</Code> in <Code>init()</Code>.
+        </div>
       </div>
 
       <Section title="Install">

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
 from ..database import get_db
-from ..auth import get_project
+from ..auth import get_project_flexible
 from ..models import Project
 
 router = APIRouter()
@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get("/v1/sessions")
 async def list_sessions(
-    project: Project = Depends(get_project),
+    project: Project = Depends(get_project_flexible),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -56,7 +56,7 @@ async def list_sessions(
 @router.get("/v1/sessions/{session_id}")
 async def get_session(
     session_id: str,
-    project: Project = Depends(get_project),
+    project: Project = Depends(get_project_flexible),
     db: AsyncSession = Depends(get_db),
 ):
     views_result = await db.execute(

@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Text, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import String, Text, DateTime, ForeignKey, UniqueConstraint, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 from .database import Base
@@ -10,13 +10,35 @@ def gen_uuid() -> str:
     return str(uuid.uuid4())
 
 
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)  # Supabase auth UUID
+    email: Mapped[str] = mapped_column(Text, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class Project(Base):
     __tablename__ = "projects"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=gen_uuid)
     name: Mapped[str] = mapped_column(Text)
-    api_key_hash: Mapped[str] = mapped_column(Text, unique=True)
+    user_id: Mapped[str | None] = mapped_column(String, ForeignKey("users.id"), nullable=True)
+    api_key_hash: Mapped[str | None] = mapped_column(Text, unique=True, nullable=True)  # legacy
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class ApiKey(Base):
+    __tablename__ = "api_keys"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=gen_uuid)
+    project_id: Mapped[str] = mapped_column(String, ForeignKey("projects.id"))
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"))
+    name: Mapped[str] = mapped_column(Text, default="Default")
+    key_hash: Mapped[str] = mapped_column(Text, unique=True)
+    prefix: Mapped[str] = mapped_column(Text)  # first 12 chars for display
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class Session(Base):

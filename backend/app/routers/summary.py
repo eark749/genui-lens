@@ -6,14 +6,14 @@ from sqlalchemy import select, func, case, distinct
 
 from ..database import get_db
 from ..models import Project, View, Event, Component, ViewComponent
-from ..auth import get_project
+from ..auth import get_project_flexible
 
 router = APIRouter()
 
 
 @router.get("/v1/summary/views")
 async def summary_views(
-    project: Project = Depends(get_project),
+    project: Project = Depends(get_project_flexible),
     db: AsyncSession = Depends(get_db),
     from_: Optional[datetime] = Query(None, alias="from"),
     to: Optional[datetime] = Query(None),
@@ -57,7 +57,7 @@ async def summary_views(
 
 @router.get("/v1/summary/components")
 async def summary_components(
-    project: Project = Depends(get_project),
+    project: Project = Depends(get_project_flexible),
     db: AsyncSession = Depends(get_db),
 ):
     query = (

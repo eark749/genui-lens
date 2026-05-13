@@ -4,14 +4,14 @@ from sqlalchemy import select
 
 from ..database import get_db
 from ..models import Project, Event, View
-from ..auth import get_project
+from ..auth import get_project_flexible
 
 router = APIRouter()
 
 
 @router.get("/debug/events")
 async def debug_events(
-    project: Project = Depends(get_project),
+    project: Project = Depends(get_project_flexible),
     db: AsyncSession = Depends(get_db),
     limit: int = Query(50, le=200),
 ):

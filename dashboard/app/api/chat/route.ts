@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { makeC1Response } from "@thesysai/genui-sdk/server";
 
-export const runtime = "edge";
+// Node.js runtime — in-memory thread store requires persistent process
+export const runtime = "nodejs";
 
 const THESYS_BASE = "https://api.thesys.dev/v1/embed";
 const MODEL = "c1/anthropic/claude-sonnet-4.6/v-20260331";
@@ -104,8 +105,9 @@ export async function POST(req: NextRequest) {
       }
       collectComponentTypes(params);
 
+      const BUTTON_TYPES = new Set(["button", "submitbutton", "iconbutton", "buttongroup"]);
       for (const compType of fieldTypes) {
-        if (compType === "button") continue;
+        if (BUTTON_TYPES.has(compType)) continue;
         postToLens("/v1/events", {
           session_id: threadId,
           view_id: prevAssistant.id,
@@ -181,14 +183,11 @@ export async function POST(req: NextRequest) {
       const assistantMsg = getAssistantMessage();
       thread.push({ ...assistantMsg, id: responseId });
 
-      // Second view POST with actual components (different auto-id for FK safety)
+      // Update same view with actual components after stream completes
       const components = extractComponents(assistantMsg.content);
       if (components.length > 0) {
-        postToLens("/v1/views", {
-          session_id: threadId,
-          thread_id: threadId,
-          intent,
-          library: "@thesysai/genui-sdk",
+        postToLens("/v1/views/components", {
+          view_id: responseId,
           components,
         });
       }
