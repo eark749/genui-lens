@@ -25,11 +25,11 @@ export default function ChatPage() {
   return (
     <div
       style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
+        position: "absolute",
+        inset: 0,
         background: isDark ? "#111113" : "#ffffff",
         border: `1px solid ${isDark ? "#27272a" : "#e5e7eb"}`,
+        overflow: "hidden",
       }}
     >
       <C1Chat
