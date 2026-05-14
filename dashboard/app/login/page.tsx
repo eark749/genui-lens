@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { register } from "@/lib/lens-api";
 
-function LoginForm() {
+export default function LoginPage() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") ?? "/projects";
@@ -165,13 +165,5 @@ function LoginForm() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
   );
 }
