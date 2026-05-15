@@ -36,7 +36,7 @@ async def create_event(
         action_type=body.action_type,
         business_type=body.business_type,
         payload=body.payload or {},
-        timestamp=body.timestamp or datetime.utcnow(),
+        timestamp=(body.timestamp.replace(tzinfo=None) if body.timestamp else datetime.utcnow()),
     )
     db.add(event)
     await db.commit()

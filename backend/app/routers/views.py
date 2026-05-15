@@ -55,7 +55,7 @@ async def create_view(
         c1_message_id=body.c1_message_id,
         thread_id=body.thread_id,
         metadata_=body.metadata or {},
-        created_at=body.timestamp or datetime.utcnow(),
+        created_at=(body.timestamp.replace(tzinfo=None) if body.timestamp else datetime.utcnow()),
     )
     db.add(view)
 
