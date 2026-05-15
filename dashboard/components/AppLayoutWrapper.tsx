@@ -19,7 +19,7 @@ export function AppLayoutWrapper({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen overflow-hidden">
       <AppSidebar />
       {isFlush ? (
-        <div className="flex-1 overflow-hidden relative">{children}</div>
+        <div className="flex-1 overflow-hidden h-full">{children}</div>
       ) : (
         <main className="flex-1 overflow-y-auto px-6 py-8">
           <div className="max-w-6xl mx-auto">{children}</div>
