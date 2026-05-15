@@ -65,15 +65,48 @@ genui-lens/
 
 ---
 
-## Self-hosting
+## Running Locally
 
-See [DEPLOY.md](./DEPLOY.md) for full AWS EC2 deployment guide (PM2 + Nginx, no Docker).
+### 1. Backend
 
----
+```bash
+cd backend
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+```
 
-## Bug Report
+Create `backend/.env`:
+```env
+DATABASE_URL=postgresql+asyncpg://<user>:<password>@<host>:5432/postgres
+SUPABASE_URL=https://<your-project>.supabase.co
+SUPABASE_JWT_SECRET=<your-jwt-secret>
+```
 
-Found a peer dependency issue in `@thesysai/genui-sdk` while building this. See [THESYS_SDK_BUG_REPORT.md](./THESYS_SDK_BUG_REPORT.md).
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+
+### 2. Dashboard
+
+```bash
+cd dashboard
+npm install --legacy-peer-deps
+```
+
+Create `dashboard/.env.local`:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+BACKEND_URL=http://localhost:8000
+THESYS_API_KEY=<your-thesys-api-key>
+GENUI_API_KEY=<your-genui-lens-api-key>
+GENUI_PROJECT_ID=<your-project-id>
+```
+
+```bash
+npm run dev   # runs on localhost:3001
+```
 
 ---
 
